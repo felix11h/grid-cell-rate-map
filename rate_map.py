@@ -1,24 +1,12 @@
 
-
 from scipy import io as io
 import numpy as np
 import pylab as pl
 
-data = io.loadmat(pth)
 
-
-
-def load_data(animal,session,data_type):
-    dstring="%s-%s_%s.mat" %(animal,session,data_type)
-    pth = os.path.join(base_pth,dstring)
-    data = io.loadmat(pth)
-    return data
-
-
-def find_id(array,value):
-    idx = (np.abs(array-value)).argmin()
-    return idx
-
+def find_k(array,value):
+    k = (np.abs(array-value)).argmin()
+    return k
 
 def rate_map(pos,spk,k=10):
 
@@ -27,8 +15,8 @@ def rate_map(pos,spk,k=10):
     posx = pos["posx"].flatten()
     posy = pos["posy"].flatten()
     
-    indx = [find_id(pos["post"],t) for t in spk["cellTS"].flatten()]
-    indy = [find_id(pos["post"],t) for t in spk["cellTS"].flatten()]    
+    indx = [find_k(pos["post"],t) for t in spk["cellTS"].flatten()]
+    indy = [find_k(pos["post"],t) for t in spk["cellTS"].flatten()]    
 
     im_s = np.histogram2d(posx[indx],posy[indy], bins=(bin_edges,bin_edges))[0]
     im_all = np.histogram2d(posx, posy, bins=(bin_edges,bin_edges))[0]*0.02
@@ -39,6 +27,8 @@ def rate_map(pos,spk,k=10):
 
 def plot_rate_map(im, nlabels=5):
 
+    from matplotlib import rc
+
     rc('text', usetex=True)
     pl.rcParams['text.latex.preamble'] = [
         r'\usepackage{tgheros}',    # helvetica font
@@ -47,7 +37,6 @@ def plot_rate_map(im, nlabels=5):
         r'\usepackage{siunitx}',    # micro symbols
         r'\sisetup{detect-all}',    # force siunitx to use the fonts
     ]  
-
 
     fig = pl.figure(figsize=(6,4))
     pl.imshow(im, interpolation='none')
@@ -59,26 +48,23 @@ def plot_rate_map(im, nlabels=5):
     return fig
 
 
-def save_figure(fig, animal, session, cell):
-    
-    fig.suptitle(cell, fontweight='bold')
-    fig.savefig("img/%s_%s-%s.pdf" %(animal, session, "T1C1"), dpi=600,
-                bbox_inches='tight')
-
-    
+   
     
 
 if __name__ == "__main__":
 
-    base_pth = "../data/8F6BE356-3277-475C-87B1-C7A977632DA7/all_data/"
+    # from http://www.ntnu.edu/kavli/research/grid-cell-data
+    pos = io.loadmat('10704-07070407_POS.mat')
+    spk = io.loadmat('10704-07070407_T2C3.mat')
 
-    animal = "10704"
-    session = "07070407"
-    cell = "T2C3"
-    
-    pos = load_data(animal, session ,"POS")
-    spk = load_data(animal, session, cell)
-    
+    '''
+    pos["post"]: times at which positions were recorded
+    pos["posx"]: x positions
+    pos["posy"]: y positions
+    ---
+    spk["cellTS"]: spike times
+    '''
+        
     im = rate_map(pos,spk,15)
-
     fig = plot_rate_map(im)
+    fig.savefig("img/rate_map.png", dpi=600, bbox_inches='tight')
