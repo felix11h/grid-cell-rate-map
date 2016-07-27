@@ -14,18 +14,22 @@ def rate_map(pos,spk,k=10):
 
     posx = pos["posx"].flatten()
     posy = pos["posy"].flatten()
+    spkt = spk["cellTS"].flatten()
     
-    indx = [find_k(pos["post"],t) for t in spk["cellTS"].flatten()]
-    indy = [find_k(pos["post"],t) for t in spk["cellTS"].flatten()]    
+    indx = [find_k(pos["post"],t) for t in spkt]
+    indy = [find_k(pos["post"],t) for t in spkt]
 
-    im_s = np.histogram2d(posx[indx],posy[indy], bins=(bin_edges,bin_edges))[0]
-    im_all = np.histogram2d(posx, posy, bins=(bin_edges,bin_edges))[0]*0.02
-    
-    im = im_s/im_all
-    return im
+    occup_m = np.histogram2d(posx, posy,
+                            bins=(bin_edges,bin_edges))[0]*0.02
+    activ_m = np.histogram2d(posx[indx],posy[indy],
+                            bins=(bin_edges,bin_edges))[0]
+  
+    rate_map = activ_m/occup_m
+
+    return rate_map
    
 
-def plot_rate_map(im, nlabels=5):
+def plot_rate_map(rm, nlabels=5):
 
     from matplotlib import rc
 
@@ -39,11 +43,11 @@ def plot_rate_map(im, nlabels=5):
     ]  
 
     fig = pl.figure(figsize=(6,4))
-    pl.imshow(im, interpolation='none')
+    pl.imshow(rm, interpolation='none')
     pl.colorbar(label="Hz")
-    pl.xticks(np.linspace(0,len(im),nlabels)-0.5,
+    pl.xticks(np.linspace(0,len(rm),nlabels)-0.5,
               np.linspace(-50,50,nlabels).astype('int'))
-    pl.yticks(np.linspace(0,len(im),nlabels)-0.5,
+    pl.yticks(np.linspace(0,len(rm),nlabels)-0.5,
               np.linspace(-50,50,nlabels).astype('int'))
     return fig
 
@@ -65,6 +69,6 @@ if __name__ == "__main__":
     spk["cellTS"]: spike times
     '''
         
-    im = rate_map(pos,spk,15)
-    fig = plot_rate_map(im)
+    rm = rate_map(pos,spk,15)
+    fig = plot_rate_map(rm)
     fig.savefig("img/rate_map.png", dpi=600, bbox_inches='tight')
