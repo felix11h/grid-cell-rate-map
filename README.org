@@ -11,7 +11,7 @@ python rate_map.py
 
 creates
 
-#+html: <p align="center"><img src=""img/rate_map.png" /></p>
+#+html: <p align="center"><img src="img/rate_map.png" /></p>
 
 
 #+BEGIN_SRC 
@@ -20,7 +20,7 @@ python path_map.py
 
 creates
 
-#+html: <p align="center"><img src=""img/path_map.png" /></p>
+#+html: <p align="center"><img src="img/path_map.png" /></p>
 
 
 See [[http://felix11h.github.io/blog/grid-cell-rate-maps][felix11h.github.io/blog]] for more information and explanation.
